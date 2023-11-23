@@ -4,18 +4,17 @@ tags:
   - Excel
   - XLSX
   - trdsql
-private: true
+private: false
 updated_at: '2023-11-23T12:11:46+09:00'
 id: f93196b4600aacefd8f0
 organization_url_name: null
 slide: false
 ignorePublish: false
 ---
-# xlsxファイルにSQLを実行するxlsxsql
 
-xlsxファイルに対してSQLを実できるツールを作りました。
+xlsxファイルに対してSQLを実できる[xlsxsql](https://github.com/noborus/xlsxsql)というツールを作りました。
 
-[GitHub](https://github.com/noborus/xlsxsql)
+GitHubの[xlsxsql](https://github.com/noborus/xlsxsql)からダウンロードできます。
 
 ## これは何？
 
@@ -122,7 +121,9 @@ $ xlsxsql --out-file out.xlsx "SELECT * FROM test.csv"
 $ xlsxsql --out-file out.xlsx --out-sheet Sheet3 --out-cell F6 --out-header "SELECT * FROM test.csv"
 ```
 
-Note: `--out-header`オプションを付けると、ヘッダー行も出力します。
+:::note info
+`--out-header`オプションを付けると、ヘッダー行も出力します。
+:::
 
 ### SQL文の省略
 
@@ -139,7 +140,9 @@ $ xlsxsql -o AT -H table test.xlsx
 +----+--------+
 ```
 
-Tips: `AT`は`ASCII Table`の出力です。
+:::note info
+ `AT`は`ASCII Table`の出力です。
+:::
 
 ### JOIN
 
@@ -237,7 +240,9 @@ LEFT JOIN test.csv AS b ON a.id=b.id"
 $ xlsxsql -o MD table test3.xlsx
 ```
 
-Tips: MDはMarkdown Table形式の出力です。
+:::note info
+MDはMarkdown Table形式の出力です。
+:::
 
 | A1 | B1 |   id   |  name  | E1 | F1 |  G1   |
 |----|----|--------|--------|----|----|-------|
