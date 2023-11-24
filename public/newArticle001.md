@@ -21,11 +21,16 @@ GitHubの[xlsxsql](https://github.com/noborus/xlsxsql)からダウンロード�
 xlsxsqlは、xlsxファイルに対してSQLを実行するツールです。
 また、CSV,LTSV,JSON,YAMLといったファイルに対してSQLを実行することもでき、その結果をxlsxファイルに出力することもできます。
 
-[trdsql](https:://github.com/noborus/trdsql)にxlsxファイルの読み書き機能を追加したものになります。
+[trdsql](https://github.com/noborus/trdsql)にxlsxファイルの読み書き機能を追加したものになります。
 
 ## 使い方
 
 単純にファイルをテーブルとして指定できます。
+
+:::note info
+`-o`または`-out`オプションは出力ファイル形式を指定します。
+CSV, LTSV, JSON, JSONL, YAML, TBLN, AT, MD等が指定できます。
+:::
 
 ```sh
 $ xlsxsql -o CSV "SELECT * FROM test.xlsx"
@@ -101,7 +106,7 @@ $ xlsxsql -o CSV "SELECT * FROM test.xlsx::.B2"
 $ xlsxsql --out-file out.xlsx "SELECT * FROM test.xlsx"
 ```
 
-また、[trdsql](https:://github.com/noborus/trdsql)で使用できるファイル形式は全て使用できます。そのため、`CSV`ファイルを`xlsx`ファイルに変換することもできます。
+また、[trdsql](https://github.com/noborus/trdsql)で使用できるファイル形式は全て使用できます。そのため、`CSV`ファイルを`xlsx`ファイルに変換することもできます。
 
 ```sh
 $ xlsxsql --out-file out.xlsx "SELECT * FROM test.csv"
