@@ -5,7 +5,7 @@ tags:
   - XLSX
   - trdsql
 private: false
-updated_at: '2023-11-23T13:22:01+09:00'
+updated_at: '2023-11-26T06:46:00+09:00'
 id: f93196b4600aacefd8f0
 organization_url_name: null
 slide: false
@@ -33,7 +33,7 @@ CSV, LTSV, JSON, JSONL, YAML, TBLN, AT, MD等が指定できます。
 :::
 
 ```sh
-$ xlsxsql query -o CSV "SELECT * FROM test.xlsx"
+$ xlsxsql -o CSV "SELECT * FROM test.xlsx"
 id,name
 1,apple
 2,orange
@@ -43,7 +43,7 @@ id,name
 最初の行をヘッダーとして扱う場合は -H オプションを付けます。
 
 ```sh
-$ xlsxsql query -o JSON -H "SELECT * FROM test.xlsx"
+$ xlsxsql -o JSON -H "SELECT * FROM test.xlsx"
 ```
 
 ```json
@@ -70,7 +70,7 @@ $ xlsxsql query -o JSON -H "SELECT * FROM test.xlsx"
 シート名を指定する場合は、ファイル名のあとに`::`を付けてシート名を付けます
 
 ```sh
-$ xlsxsql query -o CSV "SELECT * FROM test.xlsx::Sheet2"
+$ xlsxsql -o CSV "SELECT * FROM test.xlsx::Sheet2"
 ```
 
 シートのリストは `list`サブコマンドで確認できます。
@@ -87,13 +87,13 @@ Sheet2
 セルはシート名のあとに`.`を付けて指定します。
 
 ```sh
-$ xlsxsql query -o CSV "SELECT * FROM test.xlsx::Sheet2.B2"
+$ xlsxsql -o CSV "SELECT * FROM test.xlsx::Sheet2.B2"
 ```
 
 シート名を省略した場合は、最初のシートが対象となります。'::.セル名'と書けます。
 
 ```sh
-$ xlsxsql query -o CSV "SELECT * FROM test.xlsx::.B2"
+$ xlsxsql -o CSV "SELECT * FROM test.xlsx::.B2"
 ```
 
 ### xlsxファイルに出力
@@ -103,13 +103,13 @@ $ xlsxsql query -o CSV "SELECT * FROM test.xlsx::.B2"
 `-o xlsx`は省略できます。
 
 ```sh
-$ xlsxsql query --out-file out.xlsx "SELECT * FROM test.xlsx"
+$ xlsxsql --out-file out.xlsx "SELECT * FROM test.xlsx"
 ```
 
 また、[trdsql](https://github.com/noborus/trdsql)で使用できるファイル形式は全て使用できます。そのため、`CSV`ファイルを`xlsx`ファイルに変換することもできます。
 
 ```sh
-$ xlsxsql query --out-file out.xlsx "SELECT * FROM test.csv"
+$ xlsxsql --out-file out.xlsx "SELECT * FROM test.csv"
 ```
 
 #### シートのクリア
@@ -123,7 +123,7 @@ $ xlsxsql query --out-file out.xlsx "SELECT * FROM test.csv"
 `xlsx`ファイルに出力する場合は、シート名を指定できます（デフォルトはSheet1です）。また、セルを指定することもできます。
 
 ```sh
-$ xlsxsql query --out-file out.xlsx --out-sheet Sheet3 --out-cell F6 --out-header "SELECT * FROM test.csv"
+$ xlsxsql --out-file out.xlsx --out-sheet Sheet3 --out-cell F6 --out-header "SELECT * FROM test.csv"
 ```
 
 :::note info
@@ -135,7 +135,7 @@ $ xlsxsql query --out-file out.xlsx --out-sheet Sheet3 --out-cell F6 --out-heade
 `SELECT * FROM`はよく使われるので、`table`サブコマンドが用意されています。（`table`は`SELECT * FROM`の省略形です）
 
 ```sh
-$ xlsxsql table -o AT -H test.xlsx
+$ xlsxsql -o AT -H table test.xlsx
 +----+--------+
 | c1 |   c2   |
 +----+--------+
@@ -156,7 +156,7 @@ JOINもできます。これまでの指定を組み合わせてみます。
 まずシートの全体をテーブルで確認します。
 
 ```sh
-$ xlsxsql table -o AT test3.xlsx
+$ xlsxsql -o AT table test3.xlsx
 +----+----+--------+--------+----+----+-------+
 | A1 | B1 |   C1   |   D1   | E1 | F1 |  G1   |
 +----+----+--------+--------+----+----+-------+
@@ -175,7 +175,7 @@ C1からD4までにid,nameのテーブルがあり、F4からG7までにid,price
 この２つのテーブルをidで1でJOINしてみます。
 
 ```sh
-$ xlsxsql query -o AT -H "SELECT a.id,a.name,b.price 
+$ xlsxsql -o AT -H query "SELECT a.id,a.name,b.price 
 FROM test3.xlsx::.C1 AS a 
 LEFT JOIN test3.xlsx::.F4 AS b ON a.id=b.id"
 +----+--------+-------+
@@ -190,7 +190,7 @@ LEFT JOIN test3.xlsx::.F4 AS b ON a.id=b.id"
 もちろん、この内容をxlsxファイルに出力できます。入力のファイル名を出力のファイル名にすれば、同じファイルに出力できます。
 
 ```sh
-$ xlsxsql query --out-file test3.xlsx --out-header --out-sheet Sheet1 --out-cell B10 -H
+$ xlsxsql --out-file test3.xlsx --out-header --out-sheet Sheet1 --out-cell B10 -H query 
 "SELECT a.id,a.name,b.price 
 FROM test3.xlsx::.C1 AS a 
 LEFT JOIN test3.xlsx::.F4 AS b ON a.id=b.id"
@@ -199,7 +199,7 @@ LEFT JOIN test3.xlsx::.F4 AS b ON a.id=b.id"
 もう一度、シート全体を確認すると以下のようになります。
 
 ```sh
-$ xlsxsql table -o AT test3.xlsx
+$ xlsxsql -o AT table test3.xlsx
 +----+----+--------+--------+----+----+-------+
 | A1 | B1 |   C1   |   D1   | E1 | F1 |  G1   |
 +----+----+--------+--------+----+----+-------+
@@ -233,7 +233,7 @@ id,price
 さきほどのxlsxファイルとCSVファイルをJOINしてみます。`test3.xlsx::.F4`をCSVファイルに変更します。
 
 ```sh
-xlsxsql query --out-file test3.xlsx --out-header --out-sheet Sheet1 --out-cell B10 -H
+xlsxsql --out-file test3.xlsx --out-header --out-sheet Sheet1 --out-cell B10 -H query 
 "SELECT a.id,a.name,b.price 
 FROM test3.xlsx::.C1 AS a 
 LEFT JOIN test.csv AS b ON a.id=b.id"
@@ -242,7 +242,7 @@ LEFT JOIN test.csv AS b ON a.id=b.id"
 結果は以下のようになります。
 
 ```sh
-$ xlsxsql table -o MD test3.xlsx
+$ xlsxsql -o MD table test3.xlsx
 ```
 
 :::note info
