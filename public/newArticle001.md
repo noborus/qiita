@@ -5,7 +5,7 @@ tags:
   - XLSX
   - trdsql
 private: false
-updated_at: '2023-11-25T11:47:32+09:00'
+updated_at: '2023-11-26T06:55:30+09:00'
 id: f93196b4600aacefd8f0
 organization_url_name: null
 slide: false
