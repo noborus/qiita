@@ -59,7 +59,7 @@ ALTER TABLE add_user ADD COLUMN name TEXT;
 ALTER TABLE add_user ADD COLUMN age INT;
 ```
 
-まあ、いろんな事情により、DBAにとっては悪夢のように見えるかもしれませんが...
+まあ、いろんな事情により、通常やらないですし、DBAにとっては悪夢のように見えるかもしれません...
 
 そして、ちょっと意味がわからないかもしれませんが、列が0のテーブルに行を追加することもできます。
 とはいえ、`INSERT INTO zero_column VALUES ();`や`INSERT INTO zero_columns () VALUES ();`では追加できません。
@@ -108,7 +108,7 @@ postgres=# SELECT;
 ```
 
 結果に疑問を持たれた方もいるかもしれません。`SELECT;`の結果は0列0行のテーブルではなく、0列1行(row)のテーブルです。
-`SELECT`文で`FROM`句を省略する場合、通常は`SELECT 'TEST', 1+2`のような値を返すために使われます。
+`SELECT`文で`FROM`句を省略する場合、通常は`SELECT 'TEST', 1+2`のような定数を返すために使われます。
 つまり、`SELECT`文で`FROM`句を省略した場合は1行（以上）のテーブルを生成すると考えられるため、0列1行のテーブルが返されます。
 
 行を0にする方法は当然あるので、0列0行を返したいときには（いくつか方法がありますが）、私が思いついたのは以下です。
@@ -124,6 +124,7 @@ SELECT LIMIT 0;
 
 </details>
 
+:::note info
 ちなみに`psql`では列が0のテーブルは（改行も含めて）表示されないようになっているようです。
 
 ```sql
@@ -145,6 +146,11 @@ $ trdsql -driver postgres -ojson "SELECT FROM zero_column"
   {}
 ]
 ```
+
+:::
+
+PostgreSQLは0列に対応していますが、SQLの標準では（内部的以外は）0列に対応していないため、0列に対応しているかは構文によります。
+以下はそれを見ていきます。
 
 ### SELECT COUNTは0列に対応しているか？
 
@@ -170,7 +176,10 @@ SELECT count(*) FROM zero_column
 
 `*`は列のリストの全部を表すと思ってしまいますが、もう少し複雑です。マニュアルには以下のように書かれています。
 
+> https://www.postgresql.jp/document/current/html/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
 > アスタリスク（*）は、いくつかの文脈において、テーブル行や複合型の全てのフィールドを表現するために使用されます。 また、集約関数の引数として使われる場合も特殊な、つまり、その集約が明示的なパラメータをまったく必要としないという意味を持ちます。
+
+COUNTは集約関数なので、特殊な意味を持つことになります。
 
 ### VALUESは0列に対応しているか？
 
@@ -195,6 +204,44 @@ LOCATION:  scanner_yyerror, scan.l:1176
 ```
 
 `INSERT INTO zero_column VALUES ();`がエラーになった理由がわかりましたね。
+
+### DELETEは0列に対応しているか？
+
+`DELETE`は`WHERE`を省略すると、テーブルの全行を削除するので問題なく動作します。
+
+```sql
+DELETE FROM zero_column ;
+DELETE 6
+```
+
+では、0列が6行あるとして3行目を削除できるか？
+
+...お前は何を言っているんだ？...案件ですが、最後の手を使って書いてみました。
+
+<details><summary>0列の3行目を消すDELETE</summary>
+
+```sql
+
+SELECT ctid FROM zero_column ;
+  ctid  
+--------
+ (0,7)
+ (0,8)
+ (0,9)   <-- これを消したい 
+ (0,10)
+ (0,11)
+ (0,12)
+(6 rows)
+```
+
+```sql
+DELETE FROM zero_column WHERE ctid = '(0,9)';
+DELETE 1
+```
+
+他に思いついたのは、ことごとく失敗しました。
+
+</details>
 
 ### まとめ
 
