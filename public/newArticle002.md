@@ -4,7 +4,7 @@ tags:
   - SQL
   - PostgreSQL
 private: true
-updated_at: '2023-11-30T15:26:59+09:00'
+updated_at: '2023-11-30T17:50:28+09:00'
 id: 5e39d144b1510f6865bd
 organization_url_name: null
 slide: false
