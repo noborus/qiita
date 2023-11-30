@@ -1,11 +1,11 @@
 ---
 title: 0()から始まるPostgreSQL
 tags:
-  - 'SQL'
-  - 'PostgreSQL'
+  - SQL
+  - PostgreSQL
 private: true
-updated_at: ''
-id: null
+updated_at: '2023-11-30T13:24:37+09:00'
+id: 5e39d144b1510f6865bd
 organization_url_name: null
 slide: false
 ignorePublish: false
