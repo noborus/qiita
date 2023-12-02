@@ -3,6 +3,7 @@ title: 0()から始まるPostgreSQL
 tags:
   - SQL
   - PostgreSQL
+  - adventcalendar2023
 private: false
 updated_at: '2023-12-01T00:05:39+09:00'
 id: 5e39d144b1510f6865bd
@@ -31,11 +32,11 @@ SQLが対象とするテーブルの構造は、行(row)と列(column)で構成�
 
 最小のテーブル構成は何でしょうか？理論上は0行0列のテーブルが最小のテーブル構成となります。この場合の0は、プログラミング言語でいう配列の一番目[0]ではなく、長さが0の配列[]のようなものです。
 
-### 行0のテーブル
+## 行0のテーブル
 
 行が0のテーブルは、ごく普通に存在します。通常の検索で、検索条件にヒットしなければ、0行の結果テーブルが返されますし、`CREATE TABLE`で作成しただけのテーブルは、行が0のテーブルです。
 
-### 列0のテーブル
+## 列0のテーブル
 
 列が0のテーブルは、通常見ることはありません。列が0のテーブルは、値を持てないので、わざわざ作る必要がないからです。
 標準のSQLでは、列が0のテーブルを作ることはできないらしく、大抵のRDBでも列が0のテーブルは作れません。
@@ -46,7 +47,8 @@ SQLが対象とするテーブルの構造は、行(row)と列(column)で構成�
 CREATE TABLE zero_column ();
 ```
 
-PostgreSQL 7.4から列が0のテーブルを作成できることが明示されています。
+PostgreSQL 7.4から列が0のテーブルを作成できることが[明示されています](https://www.postgresql.jp/document/15/html/sql-createtable.html#id-1.9.3.85.9.11)。
+
 考え方としては、`ALTER TABLE テーブル DROP COLUMN 列名`で列を削除することで列が0のテーブルを作成できてしまうため、`DROP COLUMN`で列があったとしても、列数が0にならないようにチェックするか、列が0になるのを許容するかで、PostgreSQLは後者を選択したようです。
 
 なので、他のプログラミング言語ではよくおこなわれているような、不定長の配列（スライス）をまず空で作成して、後から要素を追加していくのが便利なように、
@@ -61,7 +63,7 @@ ALTER TABLE add_user ADD COLUMN age INT;
 
 まあ、いろんな事情により、通常やらないですし、DBAにとっては悪夢のように見えるかもしれません...
 
-### INSERTは0列に対応しているか？
+## INSERTは0列に対応しているか？
 
 そして、ちょっと意味がわからないかもしれませんが、列が0のテーブルに行を追加することもできます。
 とはいえ、`INSERT INTO zero_column VALUES ();`や`INSERT INTO zero_columns () VALUES ();`では追加できません。
@@ -93,7 +95,7 @@ INSERT INTO zero_column SELECT FROM anther_table;
 
 </details>
 
-### 最小のSELECT
+## 最小のSELECT
 
 `SELECT`文は`FROM`句が省略できることが知られています。`SELECT`のリストも空にできるので、最小の`SELECT`は以下のようになります。
 
@@ -154,7 +156,7 @@ $ trdsql -driver postgres -ojson "SELECT FROM zero_column"
 PostgreSQLは0列に対応していますが、SQLの標準では（内部的以外は）0列に対応していないため、0列に対応しているかは構文によります。
 以下はそれを見ていきます。
 
-### SELECT COUNTは0列に対応しているか？
+## SELECT COUNTは0列に対応しているか？
 
 `SELECT`のリストは空にできますが、COUNT関数は空にできません。
 
@@ -178,12 +180,12 @@ SELECT count(*) FROM zero_column
 
 `*`は列のリストの全部を表すと思ってしまいますが、もう少し複雑です。マニュアルには以下のように書かれています。
 
-> https://www.postgresql.jp/document/current/html/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS
+> <https://www.postgresql.jp/document/current/html/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS>
 > アスタリスク（*）は、いくつかの文脈において、テーブル行や複合型の全てのフィールドを表現するために使用されます。 また、集約関数の引数として使われる場合も特殊な、つまり、その集約が明示的なパラメータをまったく必要としないという意味を持ちます。
 
 COUNTは集約関数なので、特殊な意味を持つことになります。
 
-### VALUESは0列に対応しているか？
+## VALUESは0列に対応しているか？
 
 PostgreSQLでは`VALUES`は単体でも使用できます。`VALUES`は、`SELECT`文の`FROM`句を省略した場合と同じように、定数をテーブルにするために使われます。
 
@@ -207,7 +209,7 @@ LOCATION:  scanner_yyerror, scan.l:1176
 
 `INSERT INTO zero_column VALUES ();`がエラーになった理由がわかりましたね。
 
-### DELETEは0列に対応しているか？
+## DELETEは0列に対応しているか？
 
 `DELETE`は`WHERE`を省略すると、テーブルの全行を削除するので問題なく動作します。
 
@@ -245,11 +247,11 @@ DELETE 1
 
 </details>
 
-### UPDATEは0列に対応しているか？
+## UPDATEは0列に対応しているか？
 
 さすがに意味わからん。ムーリー。
 
-### まとめ
+## まとめ
 
 ```sql
 SELECT FROM オチ;
