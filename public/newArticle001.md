@@ -264,6 +264,24 @@ MDはMarkdown Table形式の出力です。
 |    |  2 | orange |    130 |    |    |       |
 |    |  3 | melon  |    140 |    |    |       |
 
+## 複数クエリー
+
+2023年12月17日にリリースされたバージョン0.4.0から複数のクエリーを実行できるようになりました。
+UPDATEやDELETEした後に結果を出力できます。
+
+```sh
+$ xlsxsql query --header --out-header
+"UPDATE test.xlsx SET Age=Age+1 WHERE Name='Alice';
+ SELECT * FROM test.xlsx"
+Name,Age
+Alice,21
+Bob,25
+Carol,30
+```
+
+更新クエリーを実行した後にSELECTクエリーを実行しないと、結果は出力されません。
+同じxlsxファイルに出力する場合もUPDATEだけでは結果は反映されないので、SELECTクエリーによって結果を出力する必要があります。
+
 ## まとめ
 
 xlsxsqlのソースコードはそれほど大きくなく、trdsqlに機能追加しただけですが、SQLの強力な構文に加えてCSV,JSON,YAML等の変換ができるので、規模の割にできることが多いツールになっていると思います。
