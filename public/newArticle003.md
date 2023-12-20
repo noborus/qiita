@@ -110,7 +110,7 @@ func otherEvent(screen tcell.Screen) {
 
 このプログラムではESCキー以外のキーが押されると、Hello, world!を1文字ずつ表示します。ESCキーが押されると終了します。
 
-![hello world](tcell-1.gifg)
+![tcell-1.gif](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/ce4fd6da-946f-f738-6b6b-8634307da6b7.gif)
 
 tcellでは、新しい画面が開かれると、ターミナル全体がキャンバスのようになり、終了すると元の画面にもどります（Windowsなど一部のターミナルエミュレーターでは、元の画面に戻らない場合があります）。
 
@@ -158,7 +158,7 @@ Unicodeで、一つのコードで幅が1でも2でも良い文字がありま�
 
 ターミナルエミュレーターによっては、設定できる場合があります。
 
-![あいまい幅](tcell-ambiguous.png)
+![tcell-ambiguous.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/b6a363c0-1fae-6fc4-2e44-f4eee13b1c43.png)
 
 曖昧幅の文字(w)： 半角 or 全角
 
@@ -190,13 +190,13 @@ func otherEvent(screen tcell.Screen) {
 ```
 
 * 曖昧幅が半角、`RUNEWIDTH_EASTASIAN=0`の場合(A)
-![A](tcell-3-1a.png)
-  曖昧幅が全角、`RUNEWIDTH_EASTASIAN=1`の場合(B)
-![B](tcell-3-2a.png)
+![A](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/ca161d84-0d30-469a-6d2a-ce5e635f397f.png)
+* 曖昧幅が全角、`RUNEWIDTH_EASTASIAN=1`の場合(B)
+![B](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/bfd5abd7-02d5-c305-1116-36ecbc2ee768.png)
 * 曖昧幅が全角、`RUNEWIDTH_EASTASIAN=0`の場合(C)
-![C](tcell-3-1b.png)
+![C](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/321004c8-a0bc-19b8-ab4c-b676ee7c895a.png)
 * 曖昧幅が半角、`RUNEWIDTH_EASTASIAN=1`の場合(D)
-![D](tcell-3-2b.png)
+![D](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/4cea150e-9bb6-e313-934e-ab194352a838.png)
 
 A,Bはあっていますが、C,Dはあっていないため、表示に問題がでています。
 ターミナルエミュレーターに合わせて環境変数を設定してもらえば良いですが、あいまい幅を仮定してアプレケーションを構築してしまうと、ターミナルエミュレーターでは設定できなかったり、設定してもらうのが難しい場合があるので注意が必要です。
@@ -206,3 +206,4 @@ A,Bはあっていますが、C,Dはあっていないため、表示に問題�
 Goのruneは、厳密には1文でではなく、2つ以上のruneを組み合わせて1つの文字を表現することができます。これを結合文字と言います。tcellでは、結合文字をサポートしています。
 
 例えば、"👨‍👩‍👧‍👦"のような絵文字は、"👨"と"👩"と"👧"と"👦"を組み合わせて1つの文字として表示しています。
+
