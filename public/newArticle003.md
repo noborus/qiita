@@ -1,11 +1,11 @@
 ---
 title: tcellを使ってアプリケーションを作る
 tags:
-  - 'tcell'
-  - 'go'
+  - Go
+  - tcell
 private: false
-updated_at: ''
-id: null
+updated_at: '2023-12-21T10:21:27+09:00'
+id: c2c9e9002761f53c6cd0
 organization_url_name: null
 slide: false
 ignorePublish: false
