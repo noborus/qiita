@@ -8,7 +8,7 @@ updated_at: ''
 id: null
 organization_url_name: null
 slide: false
-ignorePublish: true
+ignorePublish: false
 ---
 ## はじめに
 
@@ -117,7 +117,7 @@ tcellでは、新しい画面が開かれると、ターミナル全体がキャ
 ## 画面の描画
 
 画面の描画は、SetContent()で行います。
-引数は、x座標、y座標、メインの文字(rune)、結合文字(rune)、スタイルです。
+引数は、x座標、y座標、メインの文字(rune)、結合文字の配列(rune)、スタイルです。
 
 端末より大きい座標に描画しても描画されません。そのため本来はscreen.Size()でサイズを取得して、その範囲内に描画する必要があります。
 
@@ -205,5 +205,163 @@ A,Bはあっていますが、C,Dはあっていないため、表示に問題�
 
 Goのruneは、厳密には1文でではなく、2つ以上のruneを組み合わせて1つの文字を表現することができます。これを結合文字と言います。tcellでは、結合文字をサポートしています。
 
-例えば、"👨‍👩‍👧‍👦"のような絵文字は、"👨"と"👩"と"👧"と"👦"を組み合わせて1つの文字として表示しています。
+例えば、「か」に「゜」をつけると「か゚」になります。これは、U+304B(か)とU+309A(゜)を組み合わせています。これはruneを2つ使用していますので、SetContentのメインの文字では表現できません。結合文字を配列として渡す必要があります。
 
+```go
+var str []rune = []rune("かきくけこ")
+var x, i = 0, 0
+
+// その他のイベント
+func otherEvent(screen tcell.Screen) {
+	if i >= len(str) {
+		x = 0
+		i = 0
+		screen.Clear()
+	}
+	screen.SetContent(x, 0, str[i], []rune{'\u309A'}, tcell.StyleDefault)
+	x += runewidth.RuneWidth(str[i])
+	i++
+}
+```
+
+![tcell-4-1.png](![tcell-4-1.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/232a9640-3b4d-94e9-4f91-da248c7dd8ad.png))
+
+結合文字により、絵文字の結合文字等も表現できますが、実際に結合されて表示されるかは、ターミナルエミュレーターと使用するフォントに依存します。Unicodeの新しいバージョンでサポートされた文字は、まだターミナルエミュレーターに対応していない場合があります。
+
+**注意** その場合は右側にはみ出して別の文がが表示される場合があり、tcellの管理外になります。
+
+### スタイル
+
+[スタイル](https://pkg.go.dev/github.com/gdamore/tcell/v2#Style)は、文字の色、背景色、文字の装飾を指定できます。
+文字の装飾には、太字、斜体、下線、反転、点滅、消去線等があります。
+
+スタイルは、StyleDefaultを基準にして、Foreground()、Background()、Reverse()、Bold()、Blink()、Underline()、Dim()、Italic()、StrikeThrough()、Reverse()で指定します。メソッドチェーンで指定できます。
+
+```go
+  style := tcell.DefaultStyle
+  style = style.Foreground(tcell.ColorRed).Reverse(true)
+  style = style.Underline(true)
+  screen.SetContent(0, 0, 'A', nil, style)
+```
+
+色名の他にRGB値で指定することもできます。ただし、ターミナルエミュレーターによっては、RGB値がサポートされていない場合があります。
+
+```go
+  style := tcell.StyleDefault.Background(tcell.ColorRGB(0, 0, 0))
+  style = style.Foreground(tcell.ColorRGB(255, 255, 255))
+```
+
+## イベント処理
+
+イベント処理は、PollEvent()でイベントを取得して、イベントに応じて処理をおこないます。
+
+イベントは、キーイベント、マウスイベント、リサイズイベントなどがあります。さらにユーザーが定義したイベントを作成することができます。
+
+イベント処理は、イベントを取得して、それに基づいてSetContent()で画面を更新し、Show()で画面を表示します。このループは一つのgoroutineで行います。
+
+そのため、イベント処理中に時間がかかる処理を行うと、その間に他のイベントは処理されないことになって終了キーを押しても終了しないなどの問題が発生します。
+
+イベント処理に時間がかかる場合は、別のgoroutineを使用して、画面の更新は別のイベントを呼び出すようにします。イベントの呼び出し自体は、非同期に呼び出せます。
+
+### キーイベント
+
+[キーイベント](https://pkg.go.dev/github.com/gdamore/tcell/v2#EventKey)は、*tcell.EventKey型です。PollEvent()のイベントを型アサーションによって取得できます。
+
+キーイベントは、押したときではなく、押して離れたときに発生します。キーリピートが設定されているときは、リピートのタイミングで発生します。
+
+```go
+    ev := screen.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+    ...
+    }
+```
+
+ *tcell.EventKey は、Key()でキーの種類を取得できます。キーの種類は、[Key](https://pkg.go.dev/github.com/gdamore/tcell/v2#Key)型です。
+
+Key()の返り値とtcell.KeyEscapeの値を比較することで、ESCキーが押されたかどうかを判定できます。
+また印字可能なキー（英数字等）は、Rune()で取得できます。
+
+Runeだったら、画面に表示するように書き換えると以下のようになります。
+
+```go
+    if ev.Key() == tcell.KeyEscape {
+      ...
+    } else {
+			if r : ev.Rune(); r != 0 {
+					otherEvent(screen, r)
+				}
+    }
+
+〜省略〜
+
+var i = 0
+
+// その他のイベント
+func otherEvent(screen tcell.Screen, r rune) {
+	if i >= 10 {
+		i = 0
+		screen.Clear()
+	}
+	screen.SetContent(i, 0, r, nil, tcell.StyleDefault)
+	i += runewidth.RuneWidth(r)
+}
+```
+
+一応日本語も表示されます。結合文字は対応していません。runeが結合文字の場合は、その前の文字の位置の結合文字の配列に追加する必要があります（その前の文字が全角幅なら-1ではなく-2の位置と…複雑になります）。
+
+さらに Modifiers()で修飾キーの情報を取得できます。修飾キーは、[KeyMod](https://pkg.go.dev/github.com/gdamore/tcell/v2#KeyMod)型です。
+
+注意が必要なのは、キーイベントでは、修飾キーが押されたキーと既存のキーが同じに扱われる場合があるということです。
+例えば Ctrl+HはBackspaceと同じに扱われます。Ctrl+Hを押すと、Backspaceのキーイベントが発生します。
+
+また`Shift`+アルファベットは、大文字のアルファベット(rune)でイベントが発生して`Shift`が修飾キーにならない場合と、なる場合があったりします。OSやターミナルエミュレーターによって異なるため、割り当てるとまずいキーが多く存在します。
+
+キーイベントとイベントハンドラの割り当ては、多くなってくると管理が大変になり、設定による変更も難しくなります。
+自前で書くこともできますが、[cbind](https://docs.rocket9labs.com/code.rocketnine.space/tslocum/cbind/)を使うと楽にできます。
+
+### マウスイベント
+
+[マウスイベント](https://pkg.go.dev/github.com/gdamore/tcell/v2#EventMouse)は、*tcell.EventMouse型です。
+PollEvent()のイベントを型アサーションによって取得できます。
+
+マウスイベントは（ターミナルエミュレーターがサポートしていれば）マウスカーソルが移動したときにも発生させることができます。
+そうするとイベントが頻繁に発生するため、処理が重くなるので、マウスイベントを有効にするときに選択できます。
+
+* MouseButtonEvents = MouseFlags(1) // クリックのみ
+* MouseDragEvents   = MouseFlags(2) // クリックとドラッグ
+* MouseMotionEvents = MouseFlags(4) // すべてのマウスイベント
+
+スクリーンを初期化した後に、EnableMouse()で有効にします。
+
+```go
+    screen.EnableMouse(tcell.MouseButtonEvents)
+```
+
+これでインベントループのときに、マウスイベントを取得できます。
+
+```go
+    ev := screen.PollEvent()
+    switch ev := ev.(type) {
+    case *tcell.EventKey:
+    ...
+    case *tcell.EventMouse:
+      // マウスイベントの場合
+			otherEvent(screen)
+    }
+```
+
+ev.Buttons()でマウスのボタンの種類を取得できます。[ButtonMask](https://pkg.go.dev/github.com/gdamore/tcell/v2#ButtonMask)型です。
+以下のようにすれば、左クリックのみの場合に処理を行うことができます。
+
+```go
+    case *tcell.EventMouse:
+      if ev.Buttons()&tcell.Button1 != 0 {
+				otherEvent(screen)
+			}
+```
+
+## まとめ
+
+tcellを使って、アプリケーションを作る基本的な方法を説明しました。
+まだ紹介しきれていない機能もありますので、[_demos](https://github.com/gdamore/tcell/tree/main/_demos)などのサンプルを参考にしてください。
