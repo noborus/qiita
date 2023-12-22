@@ -224,7 +224,7 @@ func otherEvent(screen tcell.Screen) {
 }
 ```
 
-![tcell-4-1.png](![tcell-4-1.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/232a9640-3b4d-94e9-4f91-da248c7dd8ad.png))
+![tcell-4-1.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/232a9640-3b4d-94e9-4f91-da248c7dd8ad.png))
 
 結合文字により、絵文字の結合文字等も表現できますが、実際に結合されて表示されるかは、ターミナルエミュレーターと使用するフォントに依存します。Unicodeの新しいバージョンでサポートされた文字は、まだターミナルエミュレーターに対応していない場合があります。
 
