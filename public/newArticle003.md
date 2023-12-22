@@ -4,7 +4,7 @@ tags:
   - Go
   - tcell
 private: false
-updated_at: '2023-12-21T10:21:27+09:00'
+updated_at: '2023-12-22T09:12:15+09:00'
 id: c2c9e9002761f53c6cd0
 organization_url_name: null
 slide: false
