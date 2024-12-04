@@ -1,11 +1,11 @@
 ---
 title: PostgreSQLのSEARCH_PATHの落とし穴
 tags:
-  - 'PostgreSQL'
-  - 'AdventCalendar2024'
+  - PostgreSQL
+  - AdventCalendar2024
 private: true
-updated_at: ''
-id: null
+updated_at: '2024-12-04T18:57:01+09:00'
+id: 835848f159e1e2f83d5f
 organization_url_name: null
 slide: false
 ignorePublish: false
