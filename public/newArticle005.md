@@ -3,7 +3,7 @@ title: newArticle005
 tags: psqlのページャーにovを！
   - 'PostgreSQL'
   - 'AdventCalendar2024'
-private: false
+private: true
 updated_at: ''
 id: null
 organization_url_name: null
