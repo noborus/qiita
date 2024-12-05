@@ -70,13 +70,17 @@ SELECT * FROM table_user LEFT JOIN table_public ON table_user.id = table_public.
 
 そして、SEARCH_PATHは、Unixの環境変数のように設定できます。設定できる場所はいくつかあります。
 
-#### 全体の設定ファイル（postgresql.conf）で設定（デフォルトが設定されていて変更がない場合はコメントになっています）
+#### 設定ファイル（postgresql.conf）
+
+全体で設定（デフォルトが設定されていて変更がない場合はコメントになっています）。
 
 ```postgresql.conf
 search_path = '"$user", public'	# schema names
 ```
 
-#### ユーザー毎の設定。`ALTER ROLE`で設定できます
+#### ユーザー毎の設定
+
+`ALTER ROLE`で設定できます。
 
 ```sql
 ALTER ROLE user_name SET search_path = 'schema_name';
@@ -92,18 +96,26 @@ SELECT rolconfig FROM pg_roles WHERE rolname = 'user_name';
 (1 row)
 ```
 
-#### 関数作成時に設定（ユーザーを切り替えて関数を所有するユーザーの権限で実行できるため）
+#### 関数作成時に設定
+
+ユーザーを切り替えて関数を所有するユーザーの権限で実行できるため。
 
 マニュアルを参照してください。[PostgreSQL: Documentation: 16: CREATE FUNCTION](https://www.postgresql.jp/document/16/html/sql-createfunction.html)
 
-#### ログインしてから`SET SEARCH_PATH`で設定
+#### SET SEARCH_PATHで設定
 
-`SET SEARCH_PATH`で設定できます。
-そして最終的に設定していある`SEARCH_PATH`は、`SHOW SEARCH_PATH`で確認できます。
+ログインしてから``SET SEARCH_PATH`で設定できます。
 
 ```sql
 # CREATE SCHEMA test;
 CREATE SCHEMA
+```
+
+### SEARCH_PATHの確認
+
+そして最終的に設定していある`SEARCH_PATH`は、`SHOW SEARCH_PATH`で確認できます。
+
+```sql
 # SET SEARCH_PATH = test;
 SET
 # show SEARCH_PATH;
