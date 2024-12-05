@@ -1,6 +1,6 @@
 ---
-title: newArticle005
-tags: psqlのページャーにovを！
+title: psqlのページャーにovを！
+tags:
   - 'PostgreSQL'
   - 'AdventCalendar2024'
 private: true
