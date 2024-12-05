@@ -12,7 +12,10 @@ ignorePublish: false
 ---
 この記事は、[2024年Advent Calendar](https://qiita.com/advent-calendar/2024/postgresql)の12月6日の記事その1です。
 
-その2の記事も書きました[psqlのページャーにovを！](https://qiita.com/ovrmrw/items/)
+私はターミナルページャーを作っていて、psqlでも便利に使えるようになっています。
+そこで、その2の記事も書きました[psqlのページャーにovを！](https://qiita.com/ovrmrw/items/6ac19b754f896e41197c)
+
+今回はそれとは関係なく、PostgreSQLの`SEARCH_PATH`について書きます。
 
 ## SCHEMA（スキーマ）
 
@@ -39,11 +42,17 @@ SELECT * FROM database_name.schema_name.table_name;
 
 ## SEARCH_PATH
 
-SCHEMAは複数作成でき、違うSCHEMAに同じ名前のテーブル等を作成できます。同じ名前のテーブルを作成しておいて、アクセスするときに違うSCHEMAを使用することで、実際には違うテーブルを参照できるというのは意図した動作です。
+SEARCH_PATHはUnix系のPATHと同じように`SCHEMA`を登録しておけば、SEARCH_PATHに登録してあるテーブル等は`SCHEMA名`を省略してアクセスできる機能です。
 
-例えば、PostgreSQLのデフォルトの`SEARCH_PATH`では'$user', publicとなっています。'$user'はユーザー名のSCHEMAとなります。
+`SCHEMA`は複数作成でき、違うSCHEMAに同じ名前のテーブル等を作成できます。同じ名前のテーブルを作成しておいて、アクセスするときに違うSCHEMAを使用することで、実際には違うテーブルを参照できるというのは意図した動作です。
+
+例えば、PostgreSQLのデフォルトの`SEARCH_PATH`では'$user', publicとなっています。'$user'はユーザー名の`SCHEMA`となります。
+デフォルトでは`public`という`SCHEMA`が作成されていて、ユーザー名の`SCHEMA`は作成されていません。そのため、`SCHEMA`を指定しない場合は`public`が使われます。
 `SEARCH_PATH`は、左側が優先です。
-ユーザー用のテーブルをユーザー名のSCHEMAに作成し、共通のテーブルを`public`のSCHEMAに作成することで、ログインしたユーザー向けの結果を返すことができます。
+
+ユーザー名の`SCHEMA`を利用すると、以下のようなことができます。
+
+ユーザー用のテーブルをユーザー名の`SCHEMA`に作成し、共通のテーブルを`public`の`SCHEMA`に作成することで、ログインしたユーザー向けの結果を返すことができます。
 
 ```sql
 SELECT * FROM user_name.table_usre LEFT JOIN public.table_public ON user_name.table_user.id = public.table_public.id;
@@ -59,7 +68,7 @@ SELECT * FROM table_user LEFT JOIN table_public ON table_user.id = table_public.
 
 ### SEARCH_PATHの設定
 
-そして、SEARCH_PATHは、Unixの環境変数のように設定できます。具体的には、
+そして、SEARCH_PATHは、Unixの環境変数のように設定できます。設定できる場所はいくつかあります。
 
 #### 全体の設定ファイル（postgresql.conf）で設定（デフォルトが設定されていて変更がない場合はコメントになっています）
 
@@ -67,7 +76,7 @@ SELECT * FROM table_user LEFT JOIN table_public ON table_user.id = table_public.
 search_path = '"$user", public'	# schema names
 ```
 
-#### ユーザー毎の設定。`ALTER ROLE`で設定できます。
+#### ユーザー毎の設定。`ALTER ROLE`で設定できます
 
 ```sql
 ALTER ROLE user_name SET search_path = 'schema_name';
@@ -154,11 +163,11 @@ SELECT 'TORA TORA TORA';
 $$ LANGUAGE SQL IMMUTABLE;
 ```
 
-通常のSEARCH_PATHで実行。
+通常の`SEARCH_PATH`で実行。「表示されていないため」pg_caatalogが優先されます。
 
 ```sql
 # SHOW SEARCH_PATH; 
-   search_path   
+   search_path
 -----------------
  "$user", public
 (1 row)
@@ -175,7 +184,13 @@ max
 ```sql
 # SET search_path = public, pg_catalog;
 SET
-SELECT max(1);
+# SHOW search_path;
+    search_path     
+--------------------
+ public, pg_catalog
+(1 row)
+
+# SELECT max(3);
       max       
 ----------------
  TORA TORA TORA
@@ -183,6 +198,8 @@ SELECT max(1);
 ```
 
 作成したmax()関数が実行されました。
+
+## pg_tempの特殊性
 
 さて、上記で書いたデフォルトの優先順位を思い出して下さい。
 `pg_temp`、`pg_catalog`、`SEARCH_PATH`の順です。つまり、`pg_temp`に同じ名前の関数を作成すると、`pg_temp`の関数が実行されることになりませんか？
@@ -219,8 +236,10 @@ max
 
 となっていて、`pg_temp`に関数を作成しても`SCHEMA`を指定しない限り実行されないということです。
 
+## SHOW SEARCH_PATHでは気づかない
+
 関数や演算子名に関しては、まあ良いことにしても`SEARCH_PATH`の優先順位はややこしいです。
-さらに、`SEARCH_PATH`のセットにミスっても誰も指摘してくれません。環境変数的なものなので、そういうものなのですが。
+さらに、`SEARCH_PATH`のセットにミスっても誰も指摘してくれません。環境変数と同じで、そういうものなのですが。
 
 ```sql
 # SET search_path = 'public, pg_catalog, pg_temp'
@@ -256,6 +275,13 @@ SELECT current_schemas(true);
 
 ## メンテナンスコマンドのSERACH_PATHが変更
 
+pg_tempの関数が実行されないといっても、テーブルをオーバーライドされると想定していた動作と違って困る場合があります。
+PostgreSQLの17では、メンテナンスコマンド中は`SEARCH_PATH`が変更されるようになりました。
 
+[17.0 Release Notes](https://www.postgresql.org/docs/17/release-17.html#RELEASE-17-MIGRATION)
+
+`SERACH_PATH`のところは、セキュリティ問題もあり、意図しない動作の要因にもなるため、今後もまた変わるかもしれないですね。
+
+## まとめ
 
 入口はシンプルそうに見えて、中はシンプルではない世界でした。
