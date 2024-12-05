@@ -13,9 +13,9 @@ ignorePublish: false
 この記事は、[2024年Advent Calendar](https://qiita.com/advent-calendar/2024/postgresql)の12月6日の記事その1です。
 
 私はターミナルページャーを作っていて、psqlでも便利に使えるようになっています。
-そこで、その2の記事も書きました[psqlのページャーにovを！](https://qiita.com/ovrmrw/items/6ac19b754f896e41197c)
+そこで、その2の記事も書くことにしました。[psqlのページャーにovを！](https://qiita.com/ovrmrw/items/6ac19b754f896e41197c)
 
-今回はそれとは関係なく、PostgreSQLの`SEARCH_PATH`について書きます。
+こちらはそれとは関係なく、PostgreSQLの`SEARCH_PATH`について書きます。
 
 ## SCHEMA（スキーマ）
 
@@ -104,11 +104,13 @@ SELECT rolconfig FROM pg_roles WHERE rolname = 'user_name';
 
 #### SET SEARCH_PATHで設定
 
-ログインしてから``SET SEARCH_PATH`で設定できます。
+ログインしてから`SET SEARCH_PATH`で設定できます。
 
 ```sql
 # CREATE SCHEMA test;
 CREATE SCHEMA
+# SET SEARCH_PATH = test;
+SET
 ```
 
 ### SEARCH_PATHの確認
@@ -116,8 +118,6 @@ CREATE SCHEMA
 そして最終的に設定していある`SEARCH_PATH`は、`SHOW SEARCH_PATH`で確認できます。
 
 ```sql
-# SET SEARCH_PATH = test;
-SET
 # show SEARCH_PATH;
  search_path 
 -------------
