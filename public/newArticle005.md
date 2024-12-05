@@ -29,7 +29,7 @@ less 671x (GNU regular expressions)
 
 psqlを起動して、`SELECT * FROM pg_class;`を実行してみましょう。
 
-![less-image](https://qi)
+![通常のless](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/d3442a41-eb9a-f32b-6444-c464c44d2a2e.png)
 
 画面に収まらないので、カラム名と区切り線と最初の方のデータしか表示されていません。ここで表示をとどめておいて、スクロールして表示できるようにしているのがページャーです。
 そして、通常はスクロールしていくと、カラム名や区切り線もスクロールで消えていきデータだけが表示されます。
@@ -42,7 +42,9 @@ psqlを起動して、`SELECT * FROM pg_class;`を実行してみましょう。
 折返し表示がなくなり横スクロールするマークが表示されるようになっています。
 これで上の2行（カラム名と区切り線）はヘッダーとして常に表示されるようになります。
 
-![less-image2](https://qi)
+![ヘッダー付きless](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/d07ec2c8-ab09-3870-d1c9-2eef9602cef8.png)
+![ヘッダー付きless2](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/18555/58d6ac07-55eb-3890-2a7f-a04bc78f538a.png)
+
 
 今までたくさんのカラムを表示していたときには\xを使用するといった方法がありましたが、ページャーの機能により見やすくなることがわかりました。
 
