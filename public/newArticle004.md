@@ -4,7 +4,7 @@ tags:
   - PostgreSQL
   - AdventCalendar2024
 private: true
-updated_at: '2024-12-05T10:12:45+09:00'
+updated_at: '2024-12-05T14:45:56+09:00'
 id: 835848f159e1e2f83d5f
 organization_url_name: null
 slide: false
