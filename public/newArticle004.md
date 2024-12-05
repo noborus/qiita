@@ -10,10 +10,14 @@ organization_url_name: null
 slide: false
 ignorePublish: false
 ---
-## SCHEMA
+この記事は、[2024年Advent Calendar](https://qiita.com/advent-calendar/2024/postgresql)の12月6日の記事その1です。
+
+その2の記事も書きました[psqlのページャーにovを！](https://qiita.com/ovrmrw/items/)
+
+## SCHEMA（スキーマ）
 
 PostgreSQLには、`SCHEMA（スキーマ）`という概念があります。`SCHEMA`は、データベース内に作られるテーブルやビュー、関数、型などのデータベースオブジェクトを含む名前空間です。
-テーブルは`SCHEMA`に属していて、テーブルにアクセスするにはS`CHEMA名.テーブル名`という形式で指定します。
+テーブルは`SCHEMA`に属していて、テーブルにアクセスするには`SCHEMA名.テーブル名`という形式で指定します。
 
 例）
 
@@ -31,7 +35,7 @@ SELECT * FROM database_name.schema_name.table_name;
 
 ただし、PostgreSQLでは、接続したデータベース以外にはアクセスできません。そのため、実行しているデータベースの間違い防止ぐらいの意味しかありません。通常はデータベース名は省略します。
 
-そして、SCHEMA名も省略できます。省略した場合には、SEARCH_PATHによって解決される...というのは、ちょっと語弊があるなというのが、この記事の主旨です。
+そして、SCHEMA名も省略できます。省略した場合には、`SEARCH_PATH`によって解決される...のですが、そう単純でもないなというのが、この記事の主旨です。
 
 ## SEARCH_PATH
 
@@ -53,7 +57,40 @@ SELECT * FROM table_user LEFT JOIN table_public ON table_user.id = table_public.
 
 と書けることになります。記述が少なくなるだけでなく同じSQLでユーザー毎の結果を返すことができます。
 
-そして、SEARCH_PATHは、`SET SEARCH_PATH`で設定できます。デフォルトの`SEARCH_PATH`は、`SHOW SEARCH_PATH`で確認できます。
+### SEARCH_PATHの設定
+
+そして、SEARCH_PATHは、Unixの環境変数のように設定できます。具体的には、
+
+#### 全体の設定ファイル（postgresql.conf）で設定（デフォルトが設定されていて変更がない場合はコメントになっています）
+
+```postgresql.conf
+search_path = '"$user", public'	# schema names
+```
+
+#### ユーザー毎の設定。`ALTER ROLE`で設定できます。
+
+```sql
+ALTER ROLE user_name SET search_path = 'schema_name';
+```
+
+`pg_roles`の`rolconfig`で確認できます。
+
+```sql
+SELECT rolconfig FROM pg_roles WHERE rolname = 'user_name';
+         rolconfig         
+---------------------------
+ {search_path=schema_name}
+(1 row)
+```
+
+#### 関数作成時に設定（ユーザーを切り替えて関数を所有するユーザーの権限で実行できるため）
+
+マニュアルを参照してください。[PostgreSQL: Documentation: 16: CREATE FUNCTION](https://www.postgresql.jp/document/16/html/sql-createfunction.html)
+
+#### ログインしてから`SET SEARCH_PATH`で設定
+
+`SET SEARCH_PATH`で設定できます。
+そして最終的に設定していある`SEARCH_PATH`は、`SHOW SEARCH_PATH`で確認できます。
 
 ```sql
 # CREATE SCHEMA test;
@@ -71,7 +108,7 @@ SET
 
 ## 探すのはSEARCH_PATHだけではない
 
-SEARCH_PATHが設定されたSCHEMAだけが使われるというシンプルな世界であれば良いのですが、実際にはそう単純ではありません。
+`SEARCH_PATH`が設定されたSCHEMAだけが使われるというシンプルな世界であれば良いのですが、実際にはそう単純ではありません。
 その要因は`pg_catalog SCHEMA`と`pg_temp SCHEMA`です。
 
 `pg_catalog SCHEMA`は、マニュアルから引用すると
@@ -79,15 +116,16 @@ SEARCH_PATHが設定されたSCHEMAだけが使われるというシンプルな
 > このスキーマにはシステムテーブルと全ての組み込みデータ型、関数および演算子が含まれています。pg_catalogは常に検索パスに含まれています。
 
 となっています。
-これが、もし`検索パス`にpg_catalogが含まれて**いない**場合は、組み込み関数が`SELECT pg_catalog.count(*) FROM test;`のように指定しないと使えなくなってしまいますので、必要な措置です。
+これが、もし`SEARCH_PATH`に`pg_catalog`が含まれて**いない**場合は、組み込み関数が`SELECT pg_catalog.count(*) FROM test;`のように指定しないと使えなくなってしまいますので、必要な措置です。
 
-さらにややこしいのが`pg_temp SCHEMA`です。PostgreSQLでは、一時テーブルを作成するときには、通常のテーブルが作成される`SCHEMA`とは違って、`pg_temp SCHEMA`に作成されます。
+さらにややこしいのが`pg_temp SCHEMA`です。PostgreSQLでは、一時テーブルを作成するときには、通常のテーブルが作成される`SCHEMA`とは違って、
 
 ```sql
 CREATE TEMP TABLE test (id int);
 ```
 
-とすると、`pg_temp SCHEMA`に`test`テーブルが作成されます。このままだと`pg_temp.test`としてアクセスする必要があるため、自動で`pg_temp SCHEMA`が検索パスに追加されます。それにより、
+とすると、`pg_temp SCHEMA`に`test`テーブルが作成されます。
+このままだと`pg_temp.test`としてアクセスする必要があるため、自動で`pg_temp SCHEMA`が検索パスに追加されます。それにより、
 
 ```sql
 SELECT * FROM test;
@@ -98,12 +136,15 @@ SELECT * FROM test;
 ## SEARCH_PATHの優先順位
 
 ということで、`SCHEMA`を省略した場合は`SEARCH_PATH`に加えて`pg_temp`と`pg_catalog`が探されるということになります。
-上記に書いたように`SCHEMA`が違えば同じ名前のテーブルを作成できるため、`SCHEMA`を省略した場合は、優先順位が重要になります。
+上で書いたように`SCHEMA`が違えば同じ名前のテーブルを作成できるため、`SCHEMA`を省略した場合は、優先順位が重要になります。
 
 デフォルトでは、`pg_temp`、`pg_catalog`、`SEARCH_PATH`に書いた順（SERCH_PATHのデフォルトは'$user', public）となります。
 
 しかーし、`SEARCH_PATH`に`pg_temp`や`pg_catalog`を加えると優先順位を変えることができ、例えば`public`を優先することができます。
+
 つまり関数のオーバーライドができるということです。
+
+（この機構を悪用できる問題があり対応が必要な場合があります。[A Guide to CVE-2018-1058: Protect Your Search Path](https://wiki.postgresql.org/wiki/A_Guide_to_CVE-2018-1058%3A_Protect_Your_Search_Path#Next_Steps:_How_Can_I_Protect_My_Databases.3F)）
 
 まず通常のSQL関数を作ります。max()は集約関数ですが、今回は単純な文字列を返す関数にしてみます。これは`SCHEMA`を指定していないため、デフォルトの`public`に作成されます。
 
@@ -179,8 +220,7 @@ max
 となっていて、`pg_temp`に関数を作成しても`SCHEMA`を指定しない限り実行されないということです。
 
 関数や演算子名に関しては、まあ良いことにしても`SEARCH_PATH`の優先順位はややこしいです。
-さらに、`SEARCH_PATH`のセットにミスっても誰も指摘してくれません。
-環境変数的なものなので、そういうものなのですが。
+さらに、`SEARCH_PATH`のセットにミスっても誰も指摘してくれません。環境変数的なものなので、そういうものなのですが。
 
 ```sql
 # SET search_path = 'public, pg_catalog, pg_temp'
@@ -196,7 +236,9 @@ SET
 
 そのため、`SEARCH_PATH`を変更するときは、身を清め、白装束に着替え、一点に集中してミスの無いようにセットする必要があります（ウソです）。
 
-`SEARCH_PATH`がほんとのところはどうなっているか確認するには、`current_schemas()`関数を使います。
+## 真のSEARCH_PATHを確認
+
+`SEARCH_PATH`が**ほんとのところ**はどうなっているか確認するには、[`current_schemas()`](https://www.postgresql.jp/document/16/html/functions-info.html#FUNCTIONS-INFO-SESSION)関数を使います。
 
 ```sql
 SELECT current_schemas(true);
@@ -212,4 +254,8 @@ SELECT current_schemas(true);
 
 ということで、ほんとのところは`current_schemas(true)`関数を使って確認してから、リレーション（テーブル、ビュー、シーケンス）は探す、関数や演算子名は`pg_temp_*`を除外して探す...ということになります。
 
-入口はシンプルそうに見えて、中はややこしい世界ですね。
+## メンテナンスコマンドのSERACH_PATHが変更
+
+
+
+入口はシンプルそうに見えて、中はシンプルではない世界でした。
