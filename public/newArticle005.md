@@ -1,11 +1,11 @@
 ---
 title: psqlのページャーにovを！
 tags:
-  - 'PostgreSQL'
-  - 'AdventCalendar2024'
+  - PostgreSQL
+  - AdventCalendar2024
 private: true
-updated_at: ''
-id: null
+updated_at: '2024-12-05T10:12:45+09:00'
+id: 6ac19b754f896e41197c
 organization_url_name: null
 slide: false
 ignorePublish: false
