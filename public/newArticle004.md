@@ -3,7 +3,7 @@ title: PostgreSQLのSEARCH_PATHの落とし穴
 tags:
   - PostgreSQL
   - AdventCalendar2024
-private: true
+private: false
 updated_at: '2024-12-05T22:29:22+09:00'
 id: 835848f159e1e2f83d5f
 organization_url_name: null
@@ -46,7 +46,7 @@ SEARCH_PATHはUnix系のPATHと同じように`SCHEMA`を登録しておけば�
 
 `SCHEMA`は複数作成でき、違うSCHEMAに同じ名前のテーブル等を作成できます。同じ名前のテーブルを作成しておいて、アクセスするときに違うSCHEMAを使用することで、実際には違うテーブルを参照できるというのは意図した動作です。
 
-例えば、PostgreSQLのデフォルトの`SEARCH_PATH`では'$user', publicとなっています。'$user'はユーザー名の`SCHEMA`となります。
+例えば、PostgreSQLのデフォルトの`SEARCH_PATH`では`'$user', public`となっています。`'$user'`はユーザー名の`SCHEMA`となります。
 デフォルトでは`public`という`SCHEMA`が作成されていて、ユーザー名の`SCHEMA`は作成されていません。そのため、`SCHEMA`を指定しない場合は`public`が使われます。
 `SEARCH_PATH`は、左側が優先です。
 
@@ -159,7 +159,7 @@ SELECT * FROM test;
 ということで、`SCHEMA`を省略した場合は`SEARCH_PATH`に加えて`pg_temp`と`pg_catalog`が探されるということになります。
 上で書いたように`SCHEMA`が違えば同じ名前のテーブルを作成できるため、`SCHEMA`を省略した場合は、優先順位が重要になります。
 
-デフォルトでは、`pg_temp`、`pg_catalog`、`SEARCH_PATH`に書いた順（SERCH_PATHのデフォルトは'$user', public）となります。
+デフォルトでは、`pg_temp`、`pg_catalog`、`SEARCH_PATH`に書いた順（SERCH_PATHのデフォルトは`'$user', public`）となります。
 
 しかーし、`SEARCH_PATH`に`pg_temp`や`pg_catalog`を加えると優先順位を変えることができ、例えば`public`を優先することができます。
 
