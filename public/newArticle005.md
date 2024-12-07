@@ -12,6 +12,8 @@ ignorePublish: false
 ---
 この記事は、[2024年Advent Calendar](https://qiita.com/advent-calendar/2024/postgresql)の12月6日の記事その2です。
 
+MySQLShell版の[MySQL Advent Calendar 2024](https://qiita.com/noborus/items/e4b2d5437c4b1888f4b0)もご参照下さい。
+
 ## lessページャー
 
 psqlではSQLを実行して結果が画面に収まらない場合、ページャーが起動して結果を表示します。

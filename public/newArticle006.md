@@ -85,7 +85,13 @@ go install github.com/noborus/ov@latest
 
 `ov`は汎用のページャーとして使えるようになっていので、環境変数`PAGER`に設定することで様々な場面で使えます。
 
-MySQLShell用にオプションを設定する場合は、MySQLShell上でオプションを永続化するように設定します。
+また、簡単に試すには、`--pager`オプションを使用すると良いでしょう。
+
+```console
+mysqlsh --pager=ov
+```
+
+常用するには設定するのが便利です。MySQLShell用にオプションを設定する場合は、MySQLShell上でオプションを永続化するように設定します。
 
 オプションは好みによりますが、この後解説していきます。
 
