@@ -3,8 +3,8 @@ title: MySQLShellのページャーにovを！
 tags:
   - MySQL
   - AdventCalendar2024
-private: true
-updated_at: '2024-12-07T22:37:44+09:00'
+private: false
+updated_at: '2024-12-08T08:59:06+09:00'
 id: e4b2d5437c4b1888f4b0
 organization_url_name: null
 slide: false
@@ -85,13 +85,7 @@ go install github.com/noborus/ov@latest
 
 `ov`は汎用のページャーとして使えるようになっていので、環境変数`PAGER`に設定することで様々な場面で使えます。
 
-また、簡単に試すには、`--pager`オプションを使用すると良いでしょう。
-
-```console
-mysqlsh --pager=ov
-```
-
-常用するには設定するのが便利です。MySQLShell用にオプションを設定する場合は、MySQLShell上でオプションを永続化するように設定します。
+MySQLShell用にオプションを設定する場合は、MySQLShell上でオプションを永続化するように設定します。
 
 オプションは好みによりますが、この後解説していきます。
 

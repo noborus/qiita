@@ -4,15 +4,13 @@ tags:
   - PostgreSQL
   - AdventCalendar2024
 private: false
-updated_at: '2024-12-06T04:50:39+09:00'
+updated_at: '2024-12-08T08:59:39+09:00'
 id: 6ac19b754f896e41197c
 organization_url_name: null
 slide: false
 ignorePublish: false
 ---
 この記事は、[2024年Advent Calendar](https://qiita.com/advent-calendar/2024/postgresql)の12月6日の記事その2です。
-
-MySQLShell版の[MySQL Advent Calendar 2024](https://qiita.com/noborus/items/e4b2d5437c4b1888f4b0)もご参照下さい。
 
 ## lessページャー
 
